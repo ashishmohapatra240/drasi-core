@@ -12,5 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-pub mod domain_model_graph;
-pub mod model_change;
+use serde::Deserialize;
+
+/// Configuration for the MonotonicGuard middleware
+#[derive(Debug, Clone, Deserialize)]
+pub struct MonotonicGuardConfig {
+    /// The property name to check for timestamps (e.g., "last_modified_at")
+    pub timestamp_property: String,
+
+    /// Whether to fallback to Element.effective_from if the timestamp property is missing
+    /// or is not an integer. Defaults to true.
+    #[serde(default = "default_fallback")]
+    pub fallback_to_effective_from: bool,
+}
+
+fn default_fallback() -> bool {
+    true
+}
