@@ -1,0 +1,311 @@
+# Building Comfort Dashboard - Test Requests
+# Use with VS Code REST Client extension
+
+### Health Check
+GET http://localhost:9000/health
+
+### ============================================================
+### ROOM UPDATES - Temperature Changes
+### ============================================================
+
+### Update Room 101 - Trigger High Alert (temp + humidity up)
+POST http://localhost:9000/sources/sensors/events
+Content-Type: application/json
+
+{
+  "operation": "update",
+  "element": {
+    "type": "node",
+    "id": "room_101",
+    "labels": ["Room"],
+    "properties": {
+      "name": "Room 101",
+      "temp": 85,
+      "humidity": 60,
+      "co2": 450
+    }
+  }
+}
+
+### Update Room 101 - Return to Comfortable
+POST http://localhost:9000/sources/sensors/events
+Content-Type: application/json
+
+{
+  "operation": "update",
+  "element": {
+    "type": "node",
+    "id": "room_101",
+    "labels": ["Room"],
+    "properties": {
+      "name": "Room 101",
+      "temp": 72,
+      "humidity": 42,
+      "co2": 450
+    }
+  }
+}
+
+### Update Room 201 - Trigger Low Alert (cold and dry)
+POST http://localhost:9000/sources/sensors/events
+Content-Type: application/json
+
+{
+  "operation": "update",
+  "element": {
+    "type": "node",
+    "id": "room_201",
+    "labels": ["Room"],
+    "properties": {
+      "name": "Room 201",
+      "temp": 60,
+      "humidity": 25,
+      "co2": 600
+    }
+  }
+}
+
+### Update Room 204 - Fix the existing alert
+POST http://localhost:9000/sources/sensors/events
+Content-Type: application/json
+
+{
+  "operation": "update",
+  "element": {
+    "type": "node",
+    "id": "room_204",
+    "labels": ["Room"],
+    "properties": {
+      "name": "Room 204",
+      "temp": 72,
+      "humidity": 42,
+      "co2": 500
+    }
+  }
+}
+
+### ============================================================
+### ADD NEW ROOM
+### ============================================================
+
+### Insert New Room Node
+POST http://localhost:9000/sources/sensors/events
+Content-Type: application/json
+
+{
+  "operation": "insert",
+  "element": {
+    "type": "node",
+    "id": "room_105",
+    "labels": ["Room"],
+    "properties": {
+      "name": "Room 105",
+      "temp": 72,
+      "humidity": 42,
+      "co2": 500
+    }
+  }
+}
+
+### Create PART_OF Relationship for New Room
+POST http://localhost:9000/sources/sensors/events
+Content-Type: application/json
+
+{
+  "operation": "insert",
+  "element": {
+    "type": "relation",
+    "id": "rel_105",
+    "startId": "room_105",
+    "endId": "floor_01",
+    "labels": ["PART_OF"]
+  }
+}
+
+### ============================================================
+### DELETE ROOM
+### ============================================================
+
+### Delete Room 105 Relationship First
+POST http://localhost:9000/sources/sensors/events
+Content-Type: application/json
+
+{
+  "operation": "delete",
+  "element": {
+    "type": "relation",
+    "id": "rel_105",
+    "startId": "room_105",
+    "endId": "floor_01",
+    "labels": ["PART_OF"]
+  }
+}
+
+### Delete Room 105 Node
+POST http://localhost:9000/sources/sensors/events
+Content-Type: application/json
+
+{
+  "operation": "delete",
+  "element": {
+    "type": "node",
+    "id": "room_105",
+    "labels": ["Room"],
+    "properties": {
+      "name": "Room 105",
+      "temp": 72,
+      "humidity": 42,
+      "co2": 500
+    }
+  }
+}
+
+### ============================================================
+### BATCH UPDATE - Update Multiple Rooms
+### ============================================================
+
+### Batch Update - All First Floor Rooms Get Warmer
+POST http://localhost:9000/sources/sensors/events/batch
+Content-Type: application/json
+
+[
+  {
+    "operation": "update",
+    "element": {
+      "type": "node",
+      "id": "room_101",
+      "labels": ["Room"],
+      "properties": {
+        "name": "Room 101",
+        "temp": 76,
+        "humidity": 45,
+        "co2": 520
+      }
+    }
+  },
+  {
+    "operation": "update",
+    "element": {
+      "type": "node",
+      "id": "room_102",
+      "labels": ["Room"],
+      "properties": {
+        "name": "Room 102",
+        "temp": 77,
+        "humidity": 48,
+        "co2": 530
+      }
+    }
+  },
+  {
+    "operation": "update",
+    "element": {
+      "type": "node",
+      "id": "room_103",
+      "labels": ["Room"],
+      "properties": {
+        "name": "Room 103",
+        "temp": 75,
+        "humidity": 44,
+        "co2": 510
+      }
+    }
+  },
+  {
+    "operation": "update",
+    "element": {
+      "type": "node",
+      "id": "room_104",
+      "labels": ["Room"],
+      "properties": {
+        "name": "Room 104",
+        "temp": 76,
+        "humidity": 46,
+        "co2": 490
+      }
+    }
+  }
+]
+
+### ============================================================
+### RESET - Return All Rooms to Comfortable
+### ============================================================
+
+### Batch Reset - All Rooms Back to Ideal
+POST http://localhost:9000/sources/sensors/events/batch
+Content-Type: application/json
+
+[
+  {
+    "operation": "update",
+    "element": {
+      "type": "node",
+      "id": "room_101",
+      "labels": ["Room"],
+      "properties": {"name": "Room 101", "temp": 72, "humidity": 42, "co2": 450}
+    }
+  },
+  {
+    "operation": "update",
+    "element": {
+      "type": "node",
+      "id": "room_102",
+      "labels": ["Room"],
+      "properties": {"name": "Room 102", "temp": 72, "humidity": 42, "co2": 480}
+    }
+  },
+  {
+    "operation": "update",
+    "element": {
+      "type": "node",
+      "id": "room_103",
+      "labels": ["Room"],
+      "properties": {"name": "Room 103", "temp": 72, "humidity": 42, "co2": 520}
+    }
+  },
+  {
+    "operation": "update",
+    "element": {
+      "type": "node",
+      "id": "room_104",
+      "labels": ["Room"],
+      "properties": {"name": "Room 104", "temp": 72, "humidity": 42, "co2": 400}
+    }
+  },
+  {
+    "operation": "update",
+    "element": {
+      "type": "node",
+      "id": "room_201",
+      "labels": ["Room"],
+      "properties": {"name": "Room 201", "temp": 72, "humidity": 42, "co2": 500}
+    }
+  },
+  {
+    "operation": "update",
+    "element": {
+      "type": "node",
+      "id": "room_202",
+      "labels": ["Room"],
+      "properties": {"name": "Room 202", "temp": 72, "humidity": 42, "co2": 380}
+    }
+  },
+  {
+    "operation": "update",
+    "element": {
+      "type": "node",
+      "id": "room_203",
+      "labels": ["Room"],
+      "properties": {"name": "Room 203", "temp": 72, "humidity": 42, "co2": 500}
+    }
+  },
+  {
+    "operation": "update",
+    "element": {
+      "type": "node",
+      "id": "room_204",
+      "labels": ["Room"],
+      "properties": {"name": "Room 204", "temp": 72, "humidity": 42, "co2": 500}
+    }
+  }
+]

@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Building Comfort Dashboard</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: #f0f2f5;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h1 {
+            font-size: 1.8rem;
+            font-weight: 600;
+        }
+
+        .status {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .status-connected {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .status-connected .status-dot {
+            background: #4ade80;
+        }
+
+        .status-disconnected {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .status-disconnected .status-dot {
+            background: #f87171;
+            animation: none;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+
+        @media (max-width: 1024px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            overflow: hidden;
+        }
+
+        .card-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-header h2 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        .card-count {
+            background: #e5e7eb;
+            color: #6b7280;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .card-body {
+            padding: 16px;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .room-item, .floor-item, .alert-item {
+            padding: 14px 16px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            border-left: 4px solid;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .room-item:hover, .floor-item:hover, .alert-item:hover {
+            transform: translateX(4px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .room-item:last-child, .floor-item:last-child, .alert-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .comfort-good {
+            background: #ecfdf5;
+            border-left-color: #10b981;
+        }
+
+        .comfort-warn {
+            background: #fffbeb;
+            border-left-color: #f59e0b;
+        }
+
+        .comfort-alert {
+            background: #fef2f2;
+            border-left-color: #ef4444;
+        }
+
+        .item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .item-name {
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .comfort-badge {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .comfort-good .comfort-badge {
+            background: #d1fae5;
+            color: #059669;
+        }
+
+        .comfort-warn .comfort-badge {
+            background: #fef3c7;
+            color: #d97706;
+        }
+
+        .comfort-alert .comfort-badge {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .item-details {
+            font-size: 0.9rem;
+            color: #6b7280;
+        }
+
+        .item-details span {
+            margin-right: 12px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #9ca3af;
+        }
+
+        .empty-state svg {
+            width: 48px;
+            height: 48px;
+            margin-bottom: 12px;
+            opacity: 0.5;
+        }
+
+        footer {
+            margin-top: 20px;
+            text-align: center;
+            color: #9ca3af;
+            font-size: 0.85rem;
+        }
+
+        footer a {
+            color: #667eea;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🏢 Building Comfort Dashboard</h1>
+            <div id="status" class="status status-disconnected">
+                <span class="status-dot"></span>
+                <span id="status-text">Connecting...</span>
+            </div>
+        </header>
+
+        <div class="grid">
+            <!-- All Rooms Card -->
+            <div class="card">
+                <div class="card-header">
+                    <h2>All Rooms</h2>
+                    <span id="rooms-count" class="card-count">0</span>
+                </div>
+                <div class="card-body" id="rooms">
+                    <div class="empty-state">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                        </svg>
+                        <p>Waiting for data...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Alerts Card -->
+            <div class="card">
+                <div class="card-header">
+                    <h2>⚠️ Active Alerts</h2>
+                    <span id="alerts-count" class="card-count">0</span>
+                </div>
+                <div class="card-body" id="alerts">
+                    <div class="empty-state">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <p>All rooms comfortable!</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Floor Averages Card -->
+            <div class="card">
+                <div class="card-header">
+                    <h2>📊 Floor Averages</h2>
+                    <span id="floors-count" class="card-count">0</span>
+                </div>
+                <div class="card-body" id="floors">
+                    <div class="empty-state">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                        </svg>
+                        <p>Waiting for data...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>Powered by <a href="https://drasi.io" target="_blank">Drasi</a> •
+            SSE Stream: <code>http://localhost:8080/events</code> •
+            HTTP Source: <code>http://localhost:9000</code></p>
+        </footer>
+    </div>
+
+    <script>
+        // State management
+        const state = {
+            rooms: new Map(),
+            alerts: new Map(),
+            floors: new Map()
+        };
+
+        // Connect to SSE stream
+        let eventSource = null;
+        let reconnectAttempts = 0;
+        const maxReconnectAttempts = 10;
+
+        function connect() {
+            eventSource = new EventSource('http://localhost:8080/events');
+
+            eventSource.onopen = () => {
+                console.log('SSE connection established');
+                reconnectAttempts = 0;
+                updateStatus(true);
+            };
+
+            eventSource.onerror = (error) => {
+                console.error('SSE connection error:', error);
+                updateStatus(false);
+
+                // Attempt to reconnect
+                if (reconnectAttempts < maxReconnectAttempts) {
+                    reconnectAttempts++;
+                    setTimeout(() => {
+                        console.log(`Reconnection attempt ${reconnectAttempts}...`);
+                        connect();
+                    }, 2000 * reconnectAttempts);
+                }
+            };
+
+            eventSource.onmessage = (event) => {
+                try {
+                    const data = JSON.parse(event.data);
+
+                    // Skip heartbeat messages
+                    if (data.type === 'heartbeat') {
+                        console.log('Heartbeat received');
+                        return;
+                    }
+
+                    console.log('Received event:', data);
+
+                    // Route based on queryId
+                    const queryId = data.queryId || data.query_id;
+                    if (queryId === 'room-comfort') {
+                        handleRoomComfort(data.results || [data]);
+                    } else if (queryId === 'room-alerts') {
+                        handleRoomAlerts(data.results || [data]);
+                    } else if (queryId === 'floor-comfort') {
+                        handleFloorComfort(data.results || [data]);
+                    }
+                } catch (e) {
+                    console.error('Error parsing SSE data:', e, event.data);
+                }
+            };
+        }
+
+        function updateStatus(connected) {
+            const statusEl = document.getElementById('status');
+            const statusText = document.getElementById('status-text');
+
+            if (connected) {
+                statusEl.className = 'status status-connected';
+                statusText.textContent = 'Connected';
+            } else {
+                statusEl.className = 'status status-disconnected';
+                statusText.textContent = 'Disconnected';
+            }
+        }
+
+        function handleRoomComfort(results) {
+            if (!Array.isArray(results)) results = [results];
+
+            results.forEach(result => {
+                // Handle different event formats
+                const operation = result.op || result.operation || 'added';
+                const after = result.after || result.data || result;
+                const before = result.before;
+
+                const roomId = after?.RoomId || before?.RoomId;
+                if (!roomId) return;
+
+                if (operation === 'deleted' || operation === 'DELETE') {
+                    state.rooms.delete(roomId);
+                } else {
+                    state.rooms.set(roomId, after);
+                }
+            });
+
+            renderRooms();
+        }
+
+        function handleRoomAlerts(results) {
+            if (!Array.isArray(results)) results = [results];
+
+            results.forEach(result => {
+                const operation = result.op || result.operation || 'added';
+                const after = result.after || result.data || result;
+                const before = result.before;
+
+                const roomId = after?.RoomId || before?.RoomId;
+                if (!roomId) return;
+
+                if (operation === 'deleted' || operation === 'DELETE') {
+                    state.alerts.delete(roomId);
+                } else {
+                    state.alerts.set(roomId, after);
+                }
+            });
+
+            renderAlerts();
+        }
+
+        function handleFloorComfort(results) {
+            if (!Array.isArray(results)) results = [results];
+
+            results.forEach(result => {
+                const operation = result.op || result.operation || 'added';
+                const after = result.after || result.data || result;
+                const before = result.before;
+
+                const floorId = after?.FloorId || before?.FloorId;
+                if (!floorId) return;
+
+                if (operation === 'deleted' || operation === 'DELETE') {
+                    state.floors.delete(floorId);
+                } else {
+                    state.floors.set(floorId, after);
+                }
+            });
+
+            renderFloors();
+        }
+
+        function getComfortClass(level) {
+            const numLevel = Number(level);
+            if (numLevel >= 40 && numLevel <= 60) return 'comfort-good';
+            if (numLevel >= 30 && numLevel <= 70) return 'comfort-warn';
+            return 'comfort-alert';
+        }
+
+        function getComfortLabel(level) {
+            const numLevel = Number(level);
+            if (numLevel >= 40 && numLevel <= 60) return 'Comfortable';
+            if (numLevel >= 30 && numLevel <= 70) return 'Warning';
+            return 'Alert';
+        }
+
+        function renderRooms() {
+            const container = document.getElementById('rooms');
+            const countEl = document.getElementById('rooms-count');
+
+            countEl.textContent = state.rooms.size;
+
+            if (state.rooms.size === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                        </svg>
+                        <p>Waiting for data...</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const sorted = Array.from(state.rooms.values())
+                .sort((a, b) => (a.RoomName || '').localeCompare(b.RoomName || ''));
+
+            container.innerHTML = sorted.map(room => {
+                const comfort = Math.round(Number(room.ComfortLevel || 50));
+                const comfortClass = getComfortClass(comfort);
+
+                return `
+                    <div class="room-item ${comfortClass}">
+                        <div class="item-header">
+                            <span class="item-name">${room.RoomName || 'Unknown'}</span>
+                            <span class="comfort-badge">${comfort}</span>
+                        </div>
+                        <div class="item-details">
+                            <span>🌡️ ${room.Temperature || '-'}°F</span>
+                            <span>💧 ${room.Humidity || '-'}%</span>
+                            <span>💨 ${room.CO2 || '-'} ppm</span>
+                        </div>
+                        <div class="item-details">
+                            <span>📍 ${room.FloorName || 'Unknown Floor'}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderAlerts() {
+            const container = document.getElementById('alerts');
+            const countEl = document.getElementById('alerts-count');
+
+            countEl.textContent = state.alerts.size;
+
+            if (state.alerts.size === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <p>All rooms comfortable!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const sorted = Array.from(state.alerts.values())
+                .sort((a, b) => Number(a.ComfortLevel) - Number(b.ComfortLevel));
+
+            container.innerHTML = sorted.map(alert => {
+                const comfort = Math.round(Number(alert.ComfortLevel || 0));
+                const severity = comfort < 30 || comfort > 70 ? 'CRITICAL' : 'WARNING';
+
+                return `
+                    <div class="alert-item comfort-alert">
+                        <div class="item-header">
+                            <span class="item-name">${alert.RoomName || 'Unknown'}</span>
+                            <span class="comfort-badge">${severity}</span>
+                        </div>
+                        <div class="item-details">
+                            <span>Comfort Level: ${comfort}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderFloors() {
+            const container = document.getElementById('floors');
+            const countEl = document.getElementById('floors-count');
+
+            countEl.textContent = state.floors.size;
+
+            if (state.floors.size === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                        </svg>
+                        <p>Waiting for data...</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const sorted = Array.from(state.floors.values())
+                .sort((a, b) => (a.FloorName || '').localeCompare(b.FloorName || ''));
+
+            container.innerHTML = sorted.map(floor => {
+                const comfort = Number(floor.ComfortLevel || 50).toFixed(1);
+                const comfortClass = getComfortClass(comfort);
+
+                return `
+                    <div class="floor-item ${comfortClass}">
+                        <div class="item-header">
+                            <span class="item-name">${floor.FloorName || 'Unknown'}</span>
+                            <span class="comfort-badge">${comfort}</span>
+                        </div>
+                        <div class="item-details">
+                            <span>Average Comfort Level</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Initialize connection when page loads
+        connect();
+    </script>
+</body>
+</html>

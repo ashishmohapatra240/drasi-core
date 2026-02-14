@@ -1,0 +1,23 @@
+{"kind": "Header", "start_time": "2025-02-05T10:00:00Z", "description": "Building comfort monitoring initial data - 1 building, 2 floors, 8 rooms"}
+{"kind": "Node", "id": "building_01", "labels": ["Building"], "properties": {"name": "Headquarters"}}
+{"kind": "Node", "id": "floor_01", "labels": ["Floor"], "properties": {"name": "First Floor"}}
+{"kind": "Node", "id": "floor_02", "labels": ["Floor"], "properties": {"name": "Second Floor"}}
+{"kind": "Node", "id": "room_101", "labels": ["Room"], "properties": {"name": "Room 101", "temp": 72, "humidity": 42, "co2": 450}}
+{"kind": "Node", "id": "room_102", "labels": ["Room"], "properties": {"name": "Room 102", "temp": 74, "humidity": 45, "co2": 480}}
+{"kind": "Node", "id": "room_103", "labels": ["Room"], "properties": {"name": "Room 103", "temp": 68, "humidity": 35, "co2": 520}}
+{"kind": "Node", "id": "room_104", "labels": ["Room"], "properties": {"name": "Room 104", "temp": 72, "humidity": 42, "co2": 400}}
+{"kind": "Node", "id": "room_201", "labels": ["Room"], "properties": {"name": "Room 201", "temp": 78, "humidity": 55, "co2": 600}}
+{"kind": "Node", "id": "room_202", "labels": ["Room"], "properties": {"name": "Room 202", "temp": 65, "humidity": 30, "co2": 380}}
+{"kind": "Node", "id": "room_203", "labels": ["Room"], "properties": {"name": "Room 203", "temp": 72, "humidity": 42, "co2": 500}}
+{"kind": "Node", "id": "room_204", "labels": ["Room"], "properties": {"name": "Room 204", "temp": 80, "humidity": 60, "co2": 650}}
+{"kind": "Relation", "id": "rel_f1_b", "labels": ["PART_OF"], "start_id": "floor_01", "end_id": "building_01"}
+{"kind": "Relation", "id": "rel_f2_b", "labels": ["PART_OF"], "start_id": "floor_02", "end_id": "building_01"}
+{"kind": "Relation", "id": "rel_101", "labels": ["PART_OF"], "start_id": "room_101", "end_id": "floor_01"}
+{"kind": "Relation", "id": "rel_102", "labels": ["PART_OF"], "start_id": "room_102", "end_id": "floor_01"}
+{"kind": "Relation", "id": "rel_103", "labels": ["PART_OF"], "start_id": "room_103", "end_id": "floor_01"}
+{"kind": "Relation", "id": "rel_104", "labels": ["PART_OF"], "start_id": "room_104", "end_id": "floor_01"}
+{"kind": "Relation", "id": "rel_201", "labels": ["PART_OF"], "start_id": "room_201", "end_id": "floor_02"}
+{"kind": "Relation", "id": "rel_202", "labels": ["PART_OF"], "start_id": "room_202", "end_id": "floor_02"}
+{"kind": "Relation", "id": "rel_203", "labels": ["PART_OF"], "start_id": "room_203", "end_id": "floor_02"}
+{"kind": "Relation", "id": "rel_204", "labels": ["PART_OF"], "start_id": "room_204", "end_id": "floor_02"}
+{"kind": "Finish", "description": "Bootstrap complete - 1 building, 2 floors, 8 rooms loaded"}
